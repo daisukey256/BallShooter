@@ -11,7 +11,7 @@ public class Shooter : MonoBehaviour
     public int ballAmount = 100;            // 残数
     public int ballNumber;                  // ボールにつけたい識別番号
 
-    public float baseWidth;                 //
+    public float baseWidth;                 // ボールを生成する位置の制限幅
 
     // Start is called before the first frame update
     void Start()
@@ -43,7 +43,8 @@ public class Shooter : MonoBehaviour
         // (InputのX座標が画面幅のどの割合の位置にいるか比をもとめ、
         //  ballを置く台座の幅に乗じて台座上の位置を求める。
         //  ただし台座の中心のX座標が0であるから、台座の幅の半分をオフセットとして差し引く
-        float x = baseWidth *
+        float x =
+            baseWidth *
             (Input.mousePosition.x / Screen.width) -
             (baseWidth / 2);
 
