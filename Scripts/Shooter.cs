@@ -13,10 +13,13 @@ public class Shooter : MonoBehaviour
 
     public float baseWidth;                 // ボールを生成する位置の制限幅
 
+    private GameObject nextBall;                   // 次のボール（投げられるボールがない場合はnullが入る）
+
     // Start is called before the first frame update
     void Start()
     {
-
+        // 次のボールを準備する
+        PrepareNextBall();
     }
 
     // Update is called once per frame
@@ -51,30 +54,56 @@ public class Shooter : MonoBehaviour
         return transform.position + new Vector3(x, 0, 0);
     }
 
+    // 次のボールを準備
+    // ボールオブジェクトを初期位置に生成して、そのGameObjectをnextBallメンバ変数にセットする
+    // 残ボール数が0以下の場合はnullをセットする
+    void PrepareNextBall()
+    {
+
+        if (ballAmount <= 0)
+        {
+            nextBall = null;
+        }
+        else 
+        {
+            nextBall =
+                Instantiate(
+                    SampleBall(),
+                    ballParentTransform.position,
+                    Quaternion.identity
+            );
+
+            //生成したボールの親オブジェクトにBallsオブジェクトを指名
+            nextBall.transform.parent = ballParentTransform;
+
+            //カメラに写るように重力をいったん無効化
+            nextBall.GetComponent<Rigidbody>().useGravity = false;
+
+            // 残ボールを減らす
+            ballAmount--;
+        }
+    }
 
     // ボールを射出
     void Shot()
     {
-        if (ballAmount <= 0) return;
+        // 次のボールが準備できていなかったらなにもせず終了
+        if (nextBall == null) return;
 
-        // ballオブジェクト生成
-        GameObject ball =
-            Instantiate(
-                SampleBall(),
-                GetInstantiatePosition(),
-                Quaternion.identity
-            );
+        // ボールを射出位置に移動
+        GameObject ball = nextBall;
+        ball.gameObject.transform.position = GetInstantiatePosition();
+
+        //カメラに写るように無効にしていた重力を有効化
+        ball.GetComponent<Rigidbody>().useGravity = true;
+
+        // 次のボールを準備
+        PrepareNextBall();
 
         // 生成した「ボールのballNumber」にballNumberの数字を付ける
         // ballNumberは更新
         BallController bc = ball.gameObject.GetComponent<BallController>();
         bc.ballNumber = ballNumber++;
-
-        // ballAmountを減らす
-        ballAmount--;
-
-        //生成したボールの親オブジェクトにBallsオブジェクトを指名
-        ball.transform.parent = ballParentTransform;
 
         Rigidbody ballRigidbody = ball.GetComponent<Rigidbody>();
         //ボールのRigidbodyのAddForceで発射
